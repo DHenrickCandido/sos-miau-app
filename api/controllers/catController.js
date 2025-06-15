@@ -31,6 +31,29 @@ exports.getCat = async (req, res) => {
   }
 };
 
+exports.getRescueCats = async (req, res) => {
+  try {
+    console.log("Tentando buscar gatos resgatados...");
+    const doc = await db.collection('cats').where('rescued', '==', 'Sim').get();
+    console.log("Consulta Firestore executada. Documentos encontrados:", doc.size);
+
+    if(doc.empty){
+      console.log("Nenhum gato resgatado encontrado.");
+      return res.status(200).json({ response: [] });
+    }
+
+    const rescueCats = [];
+    doc.forEach(doc => {
+      rescueCats.push({ id: doc.id, ...doc.data() });
+    });
+    console.log("Gatos resgatados encontrados:", rescueCats.length);
+    res.status(200).json({response: rescueCats});
+  } catch (error) {
+    console.error("Erro no backend ao buscar gatos resgatados:", error.message);
+    res.status(500).json({error: error.message});
+  }
+}
+
 exports.updateCat = async (req, res) => {
   try {
     const catId = req.params.id;
